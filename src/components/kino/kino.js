@@ -1,6 +1,8 @@
 import React from "react";
 import Load from "./../load/load";
 
+const MaxPage = 12;
+
 export default class Kino extends React.Component {
   /*constructor(props) {
     super(props);
@@ -16,15 +18,31 @@ export default class Kino extends React.Component {
     isLoading: true
   };
 
-  onsdfjhkds = () => {
+  pagination = (page) => {
+    if (page === 'prev') {
+      page = this.state.page - 1;
+    }
+
+    if (page === 'next') {
+      page = this.state.page + 1;
+    }
+
     this.setState({
-      page: this.state.page + 1,
+      page,
+    });
+
+    this.getKino(this.state.page);
+  };
+
+  pagesBtn() {
+    return Array(MaxPage).fill().map((v, i) => {
+      return <li key={i+1} className={'page-item' + (this.state.page === i+1 ? ' active' : '')}><button className="page-link" onClick={this.pagination.bind(this, i+1)}>{i+1}</button></li>; 
     });
   }
 
-  render() {
+  getKino(page) {
     try {
-      fetch('https://api.themoviedb.org/3/movie/top_rated?api_key=9b3f406f83b247debc4209ab4acbcede&language=ru-RU&page=' + this.state.page)
+      fetch('https://api.themoviedb.org/3/movie/top_rated?api_key=9b3f406f83b247debc4209ab4acbcede&language=ru-RU&page=' + page)
         .then(response => response.json())
         .then(json => {
           this.setState({
@@ -35,7 +53,13 @@ export default class Kino extends React.Component {
     } catch (e) {
       console.log(e);
     }
+  }
 
+  componentDidMount() {
+    this.getKino(this.state.page);
+  }
+
+  render() {
     return <div className="my-4"> {this.state.isLoading ? <Load /> : (<div className="row g-4">
       {this.state.films.map(f => {
         return (
@@ -53,8 +77,24 @@ export default class Kino extends React.Component {
           </div>
         );
       })}
-      <button className="btn" onClick={this.onsdfjhkds}>Keyingi</button>
-    </div>
+      <div className="d-flex justify-content-center">
+        <nav>
+          <ul className="pagination">
+            <li className={'page-item' + (this.state.page <= 1 ? ' disabled' : '')}>
+              <button className="page-link" onClick={this.pagination.bind(this, 'prev')}>
+                <span>&laquo;</span>
+              </button>
+            </li>
+            {this.pagesBtn.call(this)}
+            <li className={'page-item' + (this.state.page >= MaxPage ? ' disabled' : '')}>
+              <button className="page-link" onClick={this.pagination.bind(this, 'next')}>
+                <span>&raquo;</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div >
     )
     }
     </div>;
